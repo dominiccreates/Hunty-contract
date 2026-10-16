@@ -1926,9 +1926,8 @@ impl RewardManager {
     /// * `admin` - The contract admin address (must match the stored admin)
     /// * `hunt_id` - The hunt whose pool cap to set
     /// * `cap` - The maximum amount to distribute per day. Must be non-negative.
-    ///           A cap of 0 **disables all distributions** from this pool (the
-    ///           distribution path rejects every attempt with `DailyCapExceeded`).
-    ///           Use `freeze_pool` for a semantically richer freeze. A positive
+    ///           A cap of 0 means unlimited daily distributions.
+    ///           To disable distributions from this pool, use `freeze_pool`. A positive
     ///           value sets a rolling 24-hour distribution limit.
     ///
     /// # Errors
@@ -2154,11 +2153,9 @@ impl RewardManager {
             Storage::add_daily_global_distributed(&env, day, amount);
 
             let pool_cap = Storage::get_daily_pool_cap(&env, hunt_id);
-            // A cap of 0 means distributions are disabled for this pool (#1074).
-            // Positive caps enforce a rolling daily maximum.
-            if pool_cap == 0 {
-                return Err(RewardErrorCode::DailyCapExceeded);
-            } else {
+            // Positive caps enforce a rolling daily maximum. A cap of 0 (or unset) means unlimited.
+            // For administrative pool disabling, use `freeze_pool`.
+            if pool_cap > 0 {
                 let used = Storage::get_daily_pool_distributed(&env, hunt_id, day);
                 if used > pool_cap {
                     return Err(RewardErrorCode::DailyCapExceeded);

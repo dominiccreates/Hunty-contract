@@ -8997,9 +8997,8 @@ and should be validated to prevent silent misconfiguration.
 * `admin` - The contract admin address (must match the stored admin)
 * `hunt_id` - The hunt whose pool cap to set
 * `cap` - The maximum amount to distribute per day. Must be non-negative.
-A cap of 0 **disables all distributions** from this pool (the
-distribution path rejects every attempt with `DailyCapExceeded`).
-Use `freeze_pool` for a semantically richer freeze. A positive
+A cap of 0 means unlimited daily distributions.
+To disable distributions from this pool, use `freeze_pool`. A positive
 value sets a rolling 24-hour distribution limit.
 
 # Errors
